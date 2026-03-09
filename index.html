@@ -416,7 +416,7 @@ document.querySelectorAll('input[type=radio]').forEach(input => {
 });
 
 function getVal(name) {
-    const el = document.querySelector(`input[name="\${name}"]:checked`);
+    const el = document.querySelector('input[name="' + name + '"]:checked');
     return el ? parseInt(el.value) : 0;
 }
 
