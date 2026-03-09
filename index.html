@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <title>OpenClaw 适合度评估</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-main: #1d1d1f;
+            --text-secondary: #86868b;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.4);
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --warning: #f56300;
+            --radius-lg: 24px;
+            --radius-md: 12px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.04);
+            --segment-bg: rgba(118, 118, 128, 0.12);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-main: #f5f5f7;
+                --text-secondary: #a1a1a6;
+                --card-bg: rgba(28, 28, 30, 0.7);
+                --card-border: rgba(255, 255, 255, 0.15);
+                --accent: #0A84FF;
+                --accent-hover: #409CFF;
+                --danger: #ff453a;
+                --success: #32d74b;
+                --warning: #ff9f0a;
+                --shadow: 0 8px 32px rgba(0,0,0,0.4);
+                --segment-bg: rgba(118, 118, 128, 0.24);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 20px 16px 80px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 680px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            padding: 40px 0 32px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            margin-bottom: 12px;
+        }
+
+        p.subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .section-header { margin-bottom: 24px; }
+        .section-title { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;}
+        .section-num {
+            color: var(--accent);
+            font-size: 15px;
+            font-weight: 700;
+            background: rgba(10, 132, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .section-hint { font-size: 14px; color: var(--text-secondary); margin-top: 6px; padding-left: 45px; }
+
+        .warning-badge {
+            font-size: 12px;
+            color: #fff;
+            background: var(--warning);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .question { margin-bottom: 32px; border-top: 1px solid var(--card-border); padding-top: 24px; }
+        .question:first-of-type { border-top: none; padding-top: 0; }
+        .q-text { font-size: 17px; font-weight: 400; margin-bottom: 16px; letter-spacing: -0.011em; }
+
+        .scale {
+            display: flex;
+            gap: 4px;
+            background: var(--segment-bg);
+            border-radius: 12px;
+            padding: 4px;
+            position: relative;
+        }
+        .scale label { flex: 1; cursor: pointer; text-align: center; }
+        .scale input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .scale span {
+            display: block;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .scale input:checked + span {
+            color: var(--text-main);
+            background: var(--card-bg);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+        }
+
+        .labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            padding: 0 4px;
+        }
+
+        .submit-area { text-align: center; margin-top: 40px; }
+        .submit-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 16px 32px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 320px;
+        }
+        .submit-btn:active { transform: scale(0.96); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .progress-text { font-size: 13px; color: var(--text-secondary); margin-top: 16px; font-weight: 500;}
+
+        /* Result Section */
+        #result {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 40px 24px;
+            margin-top: 40px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        #result.show { display: block; animation: bounceIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .result-emoji { font-size: 64px; margin-bottom: 16px; }
+        .result-score { 
+            font-size: 64px; 
+            font-weight: 700; 
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .result-max { font-size: 17px; color: var(--text-secondary); margin-bottom: 24px; font-weight: 500;}
+        .result-label { font-size: 24px; font-weight: 600; margin-bottom: 12px; }
+        .result-desc { font-size: 16px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+        
+        .result-tip {
+            background: var(--segment-bg);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            font-size: 15px;
+            color: var(--text-main);
+            text-align: left;
+        }
+        .result-tip strong { font-weight: 600; }
+
+        .dim-breakdown {
+            margin-top: 32px;
+            text-align: left;
+            background: rgba(120, 120, 128, 0.04);
+            padding: 20px;
+            border-radius: var(--radius-md);
+        }
+        .dim-breakdown h3 {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+        .dim-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .dim-row:last-child { margin-bottom: 0; }
+        .dim-name { font-size: 14px; width: 100px; flex-shrink: 0; font-weight: 500;}
+        .dim-bar-bg {
+            flex: 1;
+            background: var(--segment-bg);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .dim-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--text-main);
+            width: 0;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .dim-val { font-size: 13px; color: var(--text-secondary); width: 45px; text-align: right; font-variant-numeric: tabular-nums;}
+
+        .veto-warning {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--danger);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            margin-top: 24px;
+            text-align: left;
+            display: none;
+        }
+
+        .retry-btn {
+            background: var(--segment-bg);
+            color: var(--text-main);
+            border: none;
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 32px;
+            transition: all 0.2s;
+        }
+        .retry-btn:active { transform: scale(0.96); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>OpenClaw 适合度评估</h1>
+        <p class="subtitle">做完这 20 题，马上知道 OpenClaw 适不适合你</p>
+    </header>
+
+    <form id="quiz">
+        <div id="questions-container"></div>
+        
+        <div class="submit-area">
+            <button type="button" class="submit-btn" id="submit-btn" onclick="calcResult()">查看我的评估结果</button>
+            <div class="progress-text" id="progress-text">已作答 0 / 20</div>
+        </div>
+    </form>
+
+    <div id="result">
+        <div class="result-emoji" id="result-emoji">🎯</div>
+        <div class="result-score" id="result-score">0</div>
+        <div class="result-max">/ 100</div>
+        <div class="result-label" id="result-label">评估结果</div>
+        <div class="result-desc" id="result-desc">分析描述...</div>
+        <div class="result-tip" id="result-tip">建议...</div>
+        
+        <div id="veto-warning" class="veto-warning">
+            <strong>注意：</strong> 第一部分（关键维度）得分低于 12 分，说明你目前的工作内容不太适合被自动化。即使总分达标，实际收益也有限，建议先观望。
+        </div>
+
+        <div class="dim-breakdown">
+            <h3>各维度得分</h3>
+            <div id="dims-container"></div>
+        </div>
+
+        <button class="retry-btn" onclick="retryQuiz()">重新评估</button>
+    </div>
+</div>
+
+<script>
+const data = [
+    {
+        num: 1, title: '你的工作够"无聊"吗？', badge: '⚠️ 关键维度 ×2', hint: '越无聊越好——规律重复的工作最适合交给 AI', dimName: '工作重复性',
+        qs: [
+            '我每天/每周都有一些差不多的事要做，像整理数据、写总结、收集信息之类的',
+            '我能把自己做某件事的步骤说清楚，比如"先看A，再判断B，然后发给C"',
+            '我的工作里有大量"搬砖"操作——复制粘贴、格式转换、从这个表格搬到那个表格',
+            '我曾让 ChatGPT/Kimi 帮我做类似的事，但烦的是每次都要重新解释一遍需求'
+        ]
+    },
+    {
+        num: 2, title: '每天在多少工具间跳转？', hint: '跨工具联动是 OpenClaw 的核心优势', dimName: '多工具联动',
+        qs: [
+            '我工作时要同时用好几个软件，比如飞书、邮件、Excel、微信、钉钉等',
+            '我经常要从一个地方复制信息，粘贴到另一个地方，感觉低效且容易出错',
+            '我心里有一件事一直想"自动化"，但不知道怎么实现，就一直靠手动',
+            '我有定时要做的事，比如每天早上整理前一天的数据、每周五汇总给领导'
+        ]
+    },
+    {
+        num: 3, title: '愿意为一个工具"受苦"吗？', hint: 'OpenClaw 需要一点折腾，但值得', dimName: '折腾意愿',
+        qs: [
+            '遇到新软件，我愿意花时间看教程、跟着步骤一步步配置',
+            '如果出了问题，我会去搜一搜、问问 AI，而不是直接放弃',
+            '为了之后省事，我愿意先花 1–2 周时间折腾和调试',
+            '我能接受工具不是完美的，偶尔会出错，需要我来维护和修复'
+        ]
+    },
+    {
+        num: 4, title: '工作可以"托付出去"吗？', hint: '能放手才能让 AI 真正帮上忙', dimName: '工作可托付性',
+        qs: [
+            '我的工作里有一些事情，我可以把规则说清楚，然后放手让 AI 去执行',
+            '我的日常工作不是全靠面对面聊天、打电话谈判，或者即兴发挥创意',
+            '就算没人全程盯着，我能接受 AI 按规则自己跑任务（出错了再修正）',
+            '我有时需要"人不在电脑旁，事情也能推进"的工作方式'
+        ]
+    },
+    {
+        num: 5, title: '对它的期待现实吗？', hint: '预期对了，才不会失望', dimName: '预期合理性',
+        qs: [
+            '我不指望 OpenClaw 替代我的工作，只是想让它帮我干费时间的杂活',
+            '我知道用 AI 可能要有少量 API 费用（几十到几百起），我能接受',
+            '我最想要的结果是"少做重复的事，多留时间给真正重要的工作"',
+            '我愿意持续花时间把工作流打磨得更好，不只是试一下看看有没有用'
+        ]
+    }
+];
+
+const container = document.getElementById('questions-container');
+const dimsContainer = document.getElementById('dims-container');
+let qIndex = 1;
+
+// 1. Render Questions Dynamically
+data.forEach((sec, sIdx) => {
+    let html = `
+    <div class="section" style="animation-delay: ${sIdx * 0.1}s">
+        <div class="section-header">
+            <div class="section-title">
+                <span class="section-num">${sec.num}</span> 
+                ${sec.title}
+                ${sec.badge ? `<span class="warning-badge">${sec.badge}</span>` : ''}
+            </div>
+            <div class="section-hint">${sec.hint}</div>
+        </div>
+    `;
+
+    sec.qs.forEach(q => {
+        html += `
+        <div class="question">
+            <div class="q-text">${q}</div>
+            <div class="scale">
+                <label><input type="radio" name="q${qIndex}" value="1"><span>1</span></label>
+                <label><input type="radio" name="q${qIndex}" value="2"><span>2</span></label>
+                <label><input type="radio" name="q${qIndex}" value="3"><span>3</span></label>
+                <label><input type="radio" name="q${qIndex}" value="4"><span>4</span></label>
+                <label><input type="radio" name="q${qIndex}" value="5"><span>5</span></label>
+            </div>
+            <div class="labels">
+                <span>不符合</span>
+                <span>完全符合</span>
+            </div>
+        </div>`;
+        qIndex++;
+    });
+
+    html += `</div>`;
+    container.innerHTML += html;
+
+    // Render dim breakdown structure
+    dimsContainer.innerHTML += `
+    <div class="dim-row">
+        <div class="dim-name">${sec.dimName}</div>
+        <div class="dim-bar-bg"><div class="dim-bar-fill" id="dim${sIdx+1}-bar"></div></div>
+        <div class="dim-val" id="dim${sIdx+1}-val">0/20</div>
+    </div>`;
+});
+
+// 2. Add Event Listeners for Progress
+document.querySelectorAll('input[type=radio]').forEach(input => {
+    input.addEventListener('change', () => {
+        // Haptic feedback (if supported on mobile)
+        if (navigator.vibrate) navigator.vibrate(10);
+        
+        let answered = document.querySelectorAll('input[type=radio]:checked').length;
+        document.getElementById('progress-text').textContent = `已作答 ${answered} / 20`;
+    });
+});
+
+function getVal(name) {
+    const el = document.querySelector(`input[name="\${name}"]:checked`);
+    return el ? parseInt(el.value) : 0;
+}
+
+function calcResult() {
+    let answered = document.querySelectorAll('input[type=radio]:checked').length;
+    if (answered < 20) {
+        alert(`还有 ${20 - answered} 题未作答，请完成后再查看结果。`);
+        return;
+    }
+
+    const d1 = getVal('q1') + getVal('q2') + getVal('q3') + getVal('q4'); 
+    const d2 = getVal('q5') + getVal('q6') + getVal('q7') + getVal('q8'); 
+    const d3 = getVal('q9') + getVal('q10') + getVal('q11') + getVal('q12'); 
+    const d4 = getVal('q13') + getVal('q14') + getVal('q15') + getVal('q16'); 
+    const d5 = getVal('q17') + getVal('q18') + getVal('q19') + getVal('q20'); 
+
+    const total = (d1 * 2) + d2 + d3 + d4 + d5; 
+
+    let emoji, label, desc, tip, color;
+    if (total >= 75) {
+        emoji = '🎯'; label = '非常适合引入 OpenClaw'; color = 'var(--success)';
+        desc = '你的工作特性和个人状态都高度匹配 OpenClaw 的能力区间。重复任务多、工具联动需求强、折腾意愿足——这正是它最能发挥价值的组合。';
+        tip = '<strong>建议：</strong>马上开始，先找 1–2 个你最痛的重复场景下手，跑通之后再逐步扩展。避免一开始就做大而全的自动化。';
+    } else if (total >= 50) {
+        emoji = '📚'; label = '适合，但需补齐短板'; color = 'var(--accent)';
+        desc = '整体适配度不错，但有 1–2 个维度拖了后腿。引入 OpenClaw 是可行的，只是需要针对性补强弱项，否则容易半途而废。';
+        tip = '<strong>建议：</strong>查看下方"各维度得分"找出短板。如果是折腾意愿偏低，可以先找一个痛点最强的场景建立信心。';
+    } else if (total >= 30) {
+        emoji = '👀'; label = '暂时观望，先用轻量工具'; color = 'var(--warning)';
+        desc = '你的工作状态目前还不太适合直接上 OpenClaw。可能是重复任务不够多，也可能是对配置工具热情不高。强行引入可能成本大于收益。';
+        tip = '<strong>建议：</strong>先使用 Kimi、豆包等对话工具，等你反复产生"要是能自动化就好了"的念头时，再来考虑。';
+    } else {
+        emoji = '✋'; label = '目前不适合引入'; color = 'var(--danger)';
+        desc = '无论是工作内容还是个人意愿，当前时机都不成熟。OpenClaw 需要前期投入，强行引入只会让你感到挫败。';
+        tip = '<strong>建议：</strong>专注于用好基础 AI 工具，观察自己在哪些环节真正遇到瓶颈，那时候再来评估。';
+    }
+
+    document.getElementById('result-emoji').textContent = emoji;
+    
+    // Animate numbers
+    let currentScore = 0;
+    const scoreEl = document.getElementById('result-score');
+    scoreEl.style.background = `-webkit-linear-gradient(45deg, \${color}, var(--text-main))`;
+    scoreEl.style.webkitBackgroundClip = 'text';
+    
+    const timer = setInterval(() => {
+        currentScore += Math.ceil((total - currentScore) / 4);
+        scoreEl.textContent = currentScore;
+        if (currentScore >= total) {
+            scoreEl.textContent = total;
+            clearInterval(timer);
+        }
+    }, 30);
+
+    document.getElementById('result-label').textContent = label;
+    document.getElementById('result-desc').textContent = desc;
+    document.getElementById('result-tip').innerHTML = tip;
+
+    setTimeout(() => {
+        document.getElementById('dim1-bar').style.width = (d1 / 20 * 100) + '%';
+        document.getElementById('dim2-bar').style.width = (d2 / 20 * 100) + '%';
+        document.getElementById('dim3-bar').style.width = (d3 / 20 * 100) + '%';
+        document.getElementById('dim4-bar').style.width = (d4 / 20 * 100) + '%';
+        document.getElementById('dim5-bar').style.width = (d5 / 20 * 100) + '%';
+        
+        // Colorize bars based on score
+        [d1, d2, d3, d4, d5].forEach((d, i) => {
+            const bar = document.getElementById(`dim${i+1}-bar`);
+            if(d >= 16) bar.style.background = 'var(--success)';
+            else if(d >= 12) bar.style.background = 'var(--accent)';
+            else bar.style.background = 'var(--warning)';
+        });
+    }, 100);
+
+    document.getElementById('dim1-val').textContent = d1 + '/20';
+    document.getElementById('dim2-val').textContent = d2 + '/20';
+    document.getElementById('dim3-val').textContent = d3 + '/20';
+    document.getElementById('dim4-val').textContent = d4 + '/20';
+    document.getElementById('dim5-val').textContent = d5 + '/20';
+
+    document.getElementById('veto-warning').style.display = (d1 < 12) ? 'block' : 'none';
+
+    const resultEl = document.getElementById('result');
+    document.getElementById('quiz').style.display = 'none';
+    resultEl.classList.add('show');
+    
+    setTimeout(() => {
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+function retryQuiz() {
+    document.querySelectorAll('input[type=radio]').forEach(el => el.checked = false);
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('quiz').style.display = 'block';
+    
+    ['dim1', 'dim2', 'dim3', 'dim4', 'dim5'].forEach(id => {
+        document.getElementById(`${id}-bar`).style.width = '0%';
+    });
+
+    document.getElementById('progress-text').textContent = '已作答 0 / 20';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
