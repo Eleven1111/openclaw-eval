@@ -361,15 +361,15 @@
 
 <div class="container">
     <header>
-        <h1>OpenClaw 适合度评估</h1>
-        <p class="subtitle">做完这 20 题，马上知道 OpenClaw 适不适合你</p>
+        <h1>你的工作，适合交给 OpenClaw 吗？</h1>
+        <p class="subtitle">20 个问题测出你的 OpenClaw 适配指数——很多人做完才发现自己根本不需要</p>
     </header>
 
     <form id="quiz">
         <div id="questions-container"></div>
         
         <div class="submit-area">
-            <button type="button" class="submit-btn" id="submit-btn" onclick="calcResult()">查看我的评估结果</button>
+            <button type="button" class="submit-btn" id="submit-btn" onclick="calcResult()">测出我的适配指数 →</button>
             <div class="progress-text" id="progress-text">已作答 0 / 20</div>
         </div>
     </form>
@@ -422,7 +422,7 @@
 <script>
 const data = [
     {
-        num: 1, title: '你的工作够"无聊"吗？', badge: '⚠️ 关键维度 ×2', hint: '越无聊越好——规律重复的工作最适合交给 AI', dimName: '工作重复性',
+        num: 1, title: '你的工作有多"机械"？', badge: '⚠️ 关键维度 ×2', hint: '越机械越好，AI 最擅长接管没有灵魂的工作', dimName: '工作重复性',
         qs: [
             '我每天/每周都有一些差不多的事要做，像整理数据、写总结、收集信息之类的',
             '我能把自己做某件事的步骤说清楚，比如"先看A，再判断B，然后发给C"',
@@ -431,7 +431,7 @@ const data = [
         ]
     },
     {
-        num: 2, title: '每天在多少工具间跳转？', hint: '跨工具联动是 OpenClaw 的核心优势', dimName: '多工具联动',
+        num: 2, title: '你每天"搬运"多少次信息？', hint: '跨工具联动是 OpenClaw 的核心优势', dimName: '多工具联动',
         qs: [
             '我工作时要同时用好几个软件，比如飞书、邮件、Excel、微信、钉钉等',
             '我经常要从一个地方复制信息，粘贴到另一个地方，感觉低效且容易出错',
@@ -440,7 +440,7 @@ const data = [
         ]
     },
     {
-        num: 3, title: '愿意为一个工具"受苦"吗？', hint: 'OpenClaw 需要一点折腾，但值得', dimName: '折腾意愿',
+        num: 3, title: '你愿意为省事先"投资"多少精力？', hint: 'OpenClaw 需要一点折腾，但值得', dimName: '折腾意愿',
         qs: [
             '遇到新软件，我愿意花时间看教程、跟着步骤一步步配置',
             '如果出了问题，我会去搜一搜、问问 AI，而不是直接放弃',
@@ -449,7 +449,7 @@ const data = [
         ]
     },
     {
-        num: 4, title: '工作可以"托付出去"吗？', hint: '能放手才能让 AI 真正帮上忙', dimName: '工作可托付性',
+        num: 4, title: '你能放心把事情交出去吗？', hint: '能放手才能让 AI 真正帮上忙', dimName: '工作可托付性',
         qs: [
             '我的工作里有一些事情，我可以把规则说清楚，然后放手让 AI 去执行',
             '我的日常工作不是全靠面对面聊天、打电话谈判，或者即兴发挥创意',
@@ -458,7 +458,7 @@ const data = [
         ]
     },
     {
-        num: 5, title: '对它的期待现实吗？', hint: '预期对了，才不会失望', dimName: '预期合理性',
+        num: 5, title: '你对 AI 的期待，靠谱吗？', hint: '预期对了，才不会失望', dimName: '预期合理性',
         qs: [
             '我不指望 OpenClaw 替代我的工作，只是想让它帮我干费时间的杂活',
             '我知道用 AI 可能要有少量 API 费用（几十到几百起），我能接受',
@@ -550,19 +550,19 @@ function calcResult() {
 
     let emoji, label, desc, tip, color;
     if (total >= 75) {
-        emoji = '🎯'; label = '非常适合引入 OpenClaw'; color = 'var(--success)';
+        emoji = '🎯'; label = '天选之人！OpenClaw 就是为你造的'; color = 'var(--success)';
         desc = '你的工作特性和个人状态都高度匹配 OpenClaw 的能力区间。重复任务多、工具联动需求强、折腾意愿足——这正是它最能发挥价值的组合。';
         tip = '<strong>建议：</strong>马上开始，先找 1–2 个你最痛的重复场景下手，跑通之后再逐步扩展。避免一开始就做大而全的自动化。';
     } else if (total >= 50) {
-        emoji = '📚'; label = '适合，但需补齐短板'; color = 'var(--accent)';
+        emoji = '📈'; label = '苗子！稍微补课就能起飞'; color = 'var(--accent)';
         desc = '整体适配度不错，但有 1–2 个维度拖了后腿。引入 OpenClaw 是可行的，只是需要针对性补强弱项，否则容易半途而废。';
         tip = '<strong>建议：</strong>查看下方"各维度得分"找出短板。如果是折腾意愿偏低，可以先找一个痛点最强的场景建立信心。';
     } else if (total >= 30) {
-        emoji = '👀'; label = '暂时观望，先用轻量工具'; color = 'var(--warning)';
+        emoji = '👀'; label = '再等等，现在上车可能坐空'; color = 'var(--warning)';
         desc = '你的工作状态目前还不太适合直接上 OpenClaw。可能是重复任务不够多，也可能是对配置工具热情不高。强行引入可能成本大于收益。';
         tip = '<strong>建议：</strong>先使用 Kimi、豆包等对话工具，等你反复产生"要是能自动化就好了"的念头时，再来考虑。';
     } else {
-        emoji = '✋'; label = '目前不适合引入'; color = 'var(--danger)';
+        emoji = '💤'; label = '暂时不适合，别勉强自己'; color = 'var(--danger)';
         desc = '无论是工作内容还是个人意愿，当前时机都不成熟。OpenClaw 需要前期投入，强行引入只会让你感到挫败。';
         tip = '<strong>建议：</strong>专注于用好基础 AI 工具，观察自己在哪些环节真正遇到瓶颈，那时候再来评估。';
     }
