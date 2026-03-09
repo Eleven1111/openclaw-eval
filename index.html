@@ -5,7 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-    <title>OpenClaw 适合度评估</title>
+    <!-- Google Analytics GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V7FTXDCJGL"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-V7FTXDCJGL');
+    </script>
+
+    <title>OpenClaw 适合度评估 | 20 题测你和 AI 自动化的契合度</title>
+
+    <!-- SEO -->
+    <meta name="description" content="20 道题，马上知道 OpenClaw AI 自动化工具适不适合你。测测你的工作重复性、工具联动需求和折腾意愿。">
+    <meta name="keywords" content="OpenClaw, AI 自动化, 适合度评估, AI 工具测试">
+
+    <!-- Open Graph (微信/微博/社交媒体分享卡片) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://openclaw-eval.vercel.app/">
+    <meta property="og:title" content="OpenClaw 适合度评估 | 20 题测你和 AI 自动化的契合度">
+    <meta property="og:description" content="做完这 20 题，马上知道 OpenClaw 适不适合你。每题 1–5 分，看看你的 AI 自动化潜力有多高！">
+    <meta property="og:image" content="https://openclaw-eval.vercel.app/og-cover.png">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OpenClaw 适合度评估 | 20 题测你和 AI 自动化的契合度">
+    <meta name="twitter:description" content="做完这 20 题，马上知道 OpenClaw 适不适合你。">
+    <meta name="twitter:image" content="https://openclaw-eval.vercel.app/og-cover.png">
     <style>
         :root {
             --bg-color: #f5f5f7;
@@ -585,6 +612,19 @@ function calcResult() {
 
     document.getElementById('veto-warning').style.display = (d1 < 12) ? 'block' : 'none';
 
+    // GA4: track quiz completion
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'quiz_complete', {
+            score: total,
+            result_label: label,
+            dim_1_repeat: d1,
+            dim_2_tools: d2,
+            dim_3_effort: d3,
+            dim_4_delegate: d4,
+            dim_5_expectation: d5
+        });
+    }
+
     const resultEl = document.getElementById('result');
     document.getElementById('quiz').style.display = 'none';
     resultEl.classList.add('show');
@@ -628,6 +668,7 @@ function copyLink() {
     var url = getShareUrl();
     var text = getShareText() + ' ' + url;
     
+    if (typeof gtag !== 'undefined') gtag('event', 'share', { method: 'copy_link' });
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function() {
             showToast('✅ 已复制，去粘贴分享吧');
@@ -660,6 +701,7 @@ function fallbackCopy(text) {
 }
 
 function shareWeChat() {
+    if (typeof gtag !== 'undefined') gtag('event', 'share', { method: 'wechat' });
     var url = getShareUrl();
     var text = getShareText() + ' ' + url;
     
@@ -677,6 +719,7 @@ function shareWeChat() {
 }
 
 function shareWeibo() {
+    if (typeof gtag !== 'undefined') gtag('event', 'share', { method: 'weibo' });
     var url = getShareUrl();
     var text = getShareText();
     var weiboUrl = 'https://service.weibo.com/share/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(text);
@@ -684,6 +727,7 @@ function shareWeibo() {
 }
 
 function shareTwitter() {
+    if (typeof gtag !== 'undefined') gtag('event', 'share', { method: 'twitter' });
     var url = getShareUrl();
     var text = getShareText();
     var twitterUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
